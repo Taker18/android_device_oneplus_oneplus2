@@ -87,10 +87,6 @@ on init
     # Scheduler
     chown system system /sys/module/cpu_boost/parameters/sysctl_thermal_aware_scheduling
 
-    # Vibrator permissions
-    chown system system /sys/devices/virtual/timed_output/vibrator/vmax_mv
-    chmod 0644 /sys/devices/virtual/timed_output/vibrator/vmax_mv
-
     # Display color calibration
     chown system system /sys/devices/platform/kcal_ctrl.0/kcal
     chown system system /sys/devices/platform/kcal_ctrl.0/kcal_enable
@@ -133,7 +129,7 @@ on init
     # for product mode flashlight
     chown system system /proc/qcom_flash
 
-    # RGB light
+    # Modify for RGB light support
     chown system system /sys/class/leds/red/pause_lo
     chown system system /sys/class/leds/blue/pause_lo
     chown system system /sys/class/leds/green/pause_lo
@@ -145,28 +141,33 @@ on init
     chown system system /sys/class/leds/red/blink
     chown system system /sys/class/leds/blue/blink
     chown system system /sys/class/leds/green/blink
-    chown system system /sys/class/leds/rgb/rgb_blink
 
+    # Modify for RGB breath effect control support
     chown system system /sys/class/leds/red/ramp_step_ms
     chown system system /sys/class/leds/blue/ramp_step_ms
     chown system system /sys/class/leds/green/ramp_step_ms
+
     chown system system /sys/class/leds/red/duty_pcts
     chown system system /sys/class/leds/blue/duty_pcts
     chown system system /sys/class/leds/green/duty_pcts
-    chown system system /sys/class/leds/red/start_idx
-    chown system system /sys/class/leds/blue/start_idx
-    chown system system /sys/class/leds/green/start_idx
 
     chmod 660 /sys/class/leds/red/ramp_step_ms
     chmod 660 /sys/class/leds/green/ramp_step_ms
     chmod 660 /sys/class/leds/blue/ramp_step_ms
+
     chmod 660 /sys/class/leds/red/duty_pcts
     chmod 660 /sys/class/leds/green/duty_pcts
     chmod 660 /sys/class/leds/blue/duty_pcts
-    chmod 660 /sys/class/leds/red/start_idx
-    chmod 660 /sys/class/leds/green/start_idx
-    chmod 660 /sys/class/leds/blue/start_idx
-    chmod 660 /sys/class/leds/rgb/rgb_blink
+
+    # Add for enginerr app for sys/class selinux recon
+    restorecon /sys/class/leds/keyboard-backlight/brightness
+    restorecon /sys/class/leds/button-backlight/brightness
+    restorecon /sys/class/leds/red/brightness
+    restorecon /sys/class/leds/green/brightness
+    restorecon /sys/class/leds/blue/brightness
+    restorecon /sys/class/leds/red/blink
+    restorecon /sys/class/leds/green/blink
+    restorecon /sys/class/leds/blue/blink
 
     # Enable cgroup_freezer
     mkdir /sys/fs/cgroup/freezer 0750 root system
@@ -464,6 +465,7 @@ service qseecomd /system/bin/qseecomd
     class core
     user root
     group root
+    writepid /dev/cpuset/system-background/tasks
 
 service perfd /system/vendor/bin/perfd
     class main
@@ -475,11 +477,13 @@ service per_mgr /system/bin/pm-service
     class late_start
     user system
     group system net_raw
+    writepid /dev/cpuset/system-background/tasks
 
 service per_proxy /system/bin/pm-proxy
     class late_start
     user system
     group system net_raw
+    writepid /dev/cpuset/system-background/tasks
     disabled
 
 on property:init.svc.per_mgr=running
@@ -492,6 +496,7 @@ service fingerprintd /system/bin/fingerprintd
     class late_start
     user system
     group system
+    writepid /dev/cpuset/system-background/tasks
 
 service thermal-engine /system/vendor/bin/thermal-engine
     class main
@@ -500,11 +505,13 @@ service thermal-engine /system/vendor/bin/thermal-engine
     socket thermal-recv-client stream 0660 system system
     socket thermal-recv-passive-client stream 0666 system system
     group root
+    writepid /dev/cpuset/system-background/tasks
 
 service time_daemon /system/bin/time_daemon
     class late_start
     user root
     group root
+    writepid /dev/cpuset/system-background/tasks
 
 service adsprpcd /system/bin/adsprpcd
     class main
@@ -668,6 +675,7 @@ service irsc_util /system/bin/irsc_util "/etc/sec_config"
 service rmt_storage /system/bin/rmt_storage
     class core
     user root
+    writepid /dev/cpuset/system-background/tasks
 
 service rfs_access /system/bin/rfs_access
    class core
@@ -750,9 +758,11 @@ service qmuxd /system/bin/qmuxd
     class main
     user root
     group radio audio bluetooth gps qcom_diag
+    writepid /dev/cpuset/system-background/tasks
 
 service netmgrd /system/bin/netmgrd
     class main
+    writepid /dev/cpuset/system-background/tasks
 
 service ipacm-diag /system/bin/ipacm-diag
     class main
@@ -769,6 +779,7 @@ service qti /system/vendor/bin/qti
     class main
     user radio
     group radio net_raw qcom_diag usb net_admin
+    writepid /dev/cpuset/system-background/tasks
     disabled
 
 service sensors /system/bin/sensors.qcom
@@ -958,44 +969,3 @@ service msm_irqbalance /system/bin/msm_irqbalance -f /system/vendor/etc/msm_irqb
     group root
     disabled
     writepid /dev/cpuset/system-background/tasks
-
-# such color
-on property:sys.rainbow.recovery=1
-    write /sys/class/leds/red/brightness 255
-    write /sys/class/leds/red/start_idx 0
-    write /sys/class/leds/red/duty_pcts "100,100,100,0,0,50,100"
-    write /sys/class/leds/red/pause_hi 0
-    write /sys/class/leds/red/pause_lo 0
-    write /sys/class/leds/red/ramp_step_ms 100
-    write /sys/class/leds/green/brightness 255
-    write /sys/class/leds/green/start_idx 7
-    write /sys/class/leds/green/duty_pcts "0,50,100,100,0,0,0"
-    write /sys/class/leds/green/pause_hi 0
-    write /sys/class/leds/green/pause_lo 0
-    write /sys/class/leds/green/ramp_step_ms 100
-    write /sys/class/leds/blue/brightness 255
-    write /sys/class/leds/blue/start_idx 14
-    write /sys/class/leds/blue/duty_pcts "0,0,0,0,100,100,100"
-    write /sys/class/leds/blue/pause_hi 0
-    write /sys/class/leds/blue/pause_lo 0
-    write /sys/class/leds/blue/ramp_step_ms 100
-    write /sys/class/leds/rgb/rgb_blink 1
-
-on property:sys.rainbow.recovery=0
-    write /sys/class/leds/rgb/rgb_blink 0
-
-# happy dance!
-on post-fs-data
-    write /sys/class/leds/rgb/rgb_blink 0
-    write /sys/class/leds/blue/blink 0
-    write /sys/class/leds/red/blink 0
-    write /sys/class/leds/rgb/rgb_blink 0
-    write /sys/class/leds/blue/brightness 255
-    write /sys/class/leds/green/brightness 255
-    write /sys/class/leds/red/brightness 0
-    write /sys/class/leds/green/start_idx 0
-    write /sys/class/leds/green/pause_hi 0
-    write /sys/class/leds/green/pause_lo 0
-    write /sys/class/leds/green/ramp_step_ms 50
-    write /sys/class/leds/green/duty_pcts "16,25,33,41,50,58,66,74,83,91,100"
-    write /sys/class/leds/green/blink 1
