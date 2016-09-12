@@ -110,6 +110,7 @@ PRODUCT_PACKAGES += \
 
 # Camera
 PRODUCT_PACKAGES += \
+    camera.msm8994 \
     sensors.hal.tof \
     Snap
 
