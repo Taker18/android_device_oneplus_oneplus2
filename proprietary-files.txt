@@ -42,7 +42,7 @@ vendor/lib64/libbtnv.so
 # Camera
 bin/mm-qcamera-app
 bin/mm-qcamera-daemon
-lib/hw/camera.msm8994.so
+lib/hw/camera.msm8994.so:lib/hw/camera.vendor.msm8994.so
 lib/libFNVfbEngineLib.so
 lib/libmm-qcamera.so
 lib/libmmcamera_interface.so
@@ -205,7 +205,7 @@ etc/permissions/com.quicinc.cne.xml
 framework/ConnectivityExt.jar
 framework/cneapiclient.jar
 framework/com.quicinc.cne.jar
--priv-app/CNEService/CNEService.apk
+-priv-app/CNEService/CNEService.apk|ca5f9a0e15a561b36de819ade9147c0ffdda207d
 vendor/lib/libNimsWrap.so
 vendor/lib/libcne.so
 vendor/lib/libcneapiclient.so
@@ -556,7 +556,7 @@ vendor/lib64/libthermalclient.so
 vendor/lib64/libthermalioctl.so
 
 # Time services
--app/TimeService/TimeService.apk
+-app/TimeService/TimeService.apk|8bd31d8f96c2e726cdb1a9d04f4da06b0e8914dd
 bin/time_daemon
 vendor/lib/libTimeService.so
 -vendor/lib/libtime_genoff.so
